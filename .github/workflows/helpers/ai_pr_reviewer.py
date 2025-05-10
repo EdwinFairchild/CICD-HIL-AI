@@ -7,14 +7,15 @@ import sys
 # Configuration
 # Max characters of the diff to send to Gemini. Adjust if needed based on token limits and typical PR size.
 # gemini-pro has a 32k token limit (input). ~4 chars/token. 25000 chars ~ 6250 tokens.
-MAX_DIFF_CHARS = 25000 
-GEMINI_MODEL = 'gemini-1.5-flash-latest' # Use flash for speed and cost-effectiveness for this task
+MAX_DIFF_CHARS = 25000
+GEMINI_MODEL = "gemini-1.5-flash-latest"  # Use flash for speed and cost-effectiveness for this task
+
 
 def fetch_pr_diff(diff_url, github_token):
     """Fetches the diff content of a PR."""
     headers = {
-        "Authorization": f"Bearer {github_token}", # Use Bearer for GITHUB_TOKEN
-        "Accept": "application/vnd.github.v3.diff"
+        "Authorization": f"Bearer {github_token}",  # Use Bearer for GITHUB_TOKEN
+        "Accept": "application/vnd.github.v3.diff",
     }
     try:
         response = requests.get(diff_url, headers=headers, timeout=30)
@@ -23,6 +24,7 @@ def fetch_pr_diff(diff_url, github_token):
     except requests.exceptions.RequestException as e:
         print(f"::error::Failed to fetch PR diff from {diff_url}: {e}", file=sys.stderr)
         return None
+
 
 def get_ai_review(api_key: str, diff_content: str) -> str:
     """Gets a code review from Google Gemini."""
@@ -36,7 +38,9 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
             f"Truncating to {MAX_DIFF_CHARS} chars for AI review. Full context may be lost."
         )
         print(f"::warning::{warning_msg}", file=sys.stderr)
-        diff_content = diff_content[:MAX_DIFF_CHARS] + "\n\n... (diff truncated due to length)"
+        diff_content = (
+            diff_content[:MAX_DIFF_CHARS] + "\n\n... (diff truncated due to length)"
+        )
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(GEMINI_MODEL)
@@ -61,22 +65,30 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
     except Exception as e:
         print(f"::error::AI review failed: {e}", file=sys.stderr)
         return "AI_REVIEW_FAILED"
-    
-def post_pr_comment(github_token: str, repo: str, pr_number: str, comment: str):
-    """Posts a comment to the specified PR using the GitHub API."""
-    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+
+
+def post_pr_review(github_token: str, repo: str, pr_number: str, comment: str):
+    """Posts a review comment to the specified PR using the GitHub API."""
+    url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews"
     headers = {
         "Authorization": f"Bearer {github_token}",
-        "Accept": "application/vnd.github.v3+json"
+        "Accept": "application/vnd.github.v3+json",
     }
-    data = {"body": comment}
+    data = {
+        "body": comment,
+        "event": "COMMENT",  # General comment without approving/rejecting
+    }
     try:
         response = requests.post(url, json=data, headers=headers, timeout=30)
         response.raise_for_status()
-        print(f"::info::Successfully posted comment to PR #{pr_number}")
+        print(f"::info::Successfully posted review comment to PR #{pr_number}")
     except requests.exceptions.RequestException as e:
-        print(f"::error::Failed to post comment to PR #{pr_number}: {e}", file=sys.stderr)
+        print(
+            f"::error::Failed to post review comment to PR #{pr_number}: {e}",
+            file=sys.stderr,
+        )
         sys.exit(1)
+
 
 if __name__ == "__main__":
     # First, try environment variables (GitHub Actions mode)
@@ -106,13 +118,15 @@ if __name__ == "__main__":
             comment = f"AI Code Review:\n\n{review_comment}"
 
         # Post the review as a PR comment
-        post_pr_comment(github_token, repo, pr_number, comment)
+        post_pr_review(github_token, repo, pr_number, comment)
         print(review_comment)  # Still print for logs
 
     else:
         # Local CLI mode: python ai_pr_reviewer.py <API_KEY> <diff_file>
         if len(sys.argv) != 3:
-            print("Usage: python ai_pr_reviewer.py <API_KEY> <diff_file>", file=sys.stderr)
+            print(
+                "Usage: python ai_pr_reviewer.py <API_KEY> <diff_file>", file=sys.stderr
+            )
             sys.exit(1)
 
         gemini_api_key = sys.argv[1]
