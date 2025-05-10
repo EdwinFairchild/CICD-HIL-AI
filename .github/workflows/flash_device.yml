@@ -19,10 +19,16 @@ jobs:
         with:
           python-version: '3.x'
 
-    #   - name: Install dependencies
-    #     run: |
-    #       python -m pip install --upgrade pip
-    #       pip install -r .github/workflows/helpers/requirements.txt
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r .github/workflows/helpers/requirements.txt
 
       - name: Build firmware
         run: |
@@ -32,7 +38,42 @@ jobs:
       - name: Flash the device
         env:
           PROJECT_DIR: ${{ github.workspace }}
-          # could hide this path in a secret if needed, for testing i dont care
-          PATH: $PATH:/home/eddie/st/stm32cubeclt_1.17.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI
         run: |
+          source .venv/bin/activate
           python .github/workflows/helpers/flash_device.py
+
+  ai_code_review:
+    runs-on: self-hosted
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r .github/workflows/helpers/requirements.txt
+
+      - name: Get AI Code Review
+        env:
+          GEMINI_API_KEY_SECRET: ${{ secrets.NONYA_BUSINESS_API_KEY }}
+          PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
+          GITHUB_TOKEN_SECRET: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python .github/workflows/helpers/ai_pr_reviewer.py

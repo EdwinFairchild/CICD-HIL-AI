@@ -1,0 +1,7 @@
+diff --git a/main.c b/main.c
+index abc123..def456 100644
+--- a/main.c
++++ b/main.c
+@@ void main(void)
+-   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
++   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET); // Changed LED pin
