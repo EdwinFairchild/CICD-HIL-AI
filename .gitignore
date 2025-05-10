@@ -10,7 +10,8 @@ build/
 *.so
 *.exe
 *.out
-
+.github/workflows/helpers/.venv
+.github/workflows/helpers/.venv/
 # Ignore IDE specific files
 *.swp
 *.user
@@ -56,3 +57,4 @@ build/
 *.tmp
 *.temp
 *.~
+
