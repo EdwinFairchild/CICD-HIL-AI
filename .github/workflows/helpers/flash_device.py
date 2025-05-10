@@ -13,7 +13,7 @@ def flash_device():
 
     # Define the command to flash the device
     command = [
-        "STM32_Programmer_CLI",
+        "/home/eddie/st/stm32cubeclt_1.17.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI",
         "-c", "port=SWD",
         "-w", os.path.join(project_dir, "build/Debug/CICD-HIL-AI.elf"),
         "-v",
