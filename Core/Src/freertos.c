@@ -157,7 +157,7 @@ void StartTask2(void *argument)
   for(;;)
   {
     led_updates(systemLeds, NUM_LEDS);
-    osDelay(10); // 10ms granularity
+    osDelay(10); // 1000ms granularity
   }
   /* USER CODE END StartTask2 */
 }
