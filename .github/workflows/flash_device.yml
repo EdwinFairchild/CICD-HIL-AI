@@ -69,6 +69,14 @@ jobs:
           source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r .github/workflows/helpers/requirements.txt
+      - name: Debug Python environment
+        run: |
+          source .venv/bin/activate
+          python --version
+          pip --version
+          pip list
+          which python
+          which pip
 
       - name: Get AI Code Review
         env:
