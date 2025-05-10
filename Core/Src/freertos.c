@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +45,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+#define NUM_LEDS 3
+led_t systemLeds[NUM_LEDS] = {
+  {LED_GREEN, 1000, 0},
+  {LED_YELLOW, 500, 0},
+  {LED_RED, 250, 0}
+};
 /* USER CODE END Variables */
 /* Definitions for Task1 */
 osThreadId_t Task1Handle;
@@ -143,11 +148,16 @@ void StartTask1(void *argument)
 void StartTask2(void *argument)
 {
   /* USER CODE BEGIN StartTask2 */
+  // This task will be used to update the state of the LEDs
+  for(int i = 0; i < NUM_LEDS; i++)
+  {
+    led_init(&systemLeds[i], systemLeds[i].id, systemLeds[i].delay_ms);
+  }
   /* Infinite loop */
   for(;;)
   {
-    BSP_LED_Toggle(LED_YELLOW);
-    osDelay(100);
+    led_updates(systemLeds, NUM_LEDS);
+    osDelay(10); // 10ms granularity
   }
   /* USER CODE END StartTask2 */
 }

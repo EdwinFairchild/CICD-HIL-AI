@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "LED.C": "cpp",
+        "stm32h7xx_nucleo.h": "c"
+    }
+}
