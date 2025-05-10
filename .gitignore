@@ -1,0 +1,58 @@
+# Ignore build artifacts
+build/
+*.elf
+*.map
+*.bin
+*.hex
+*.o
+*.d
+*.a
+*.so
+*.exe
+*.out
+
+# Ignore IDE specific files
+*.swp
+*.user
+*.log
+*.bak
+*.tmp
+*.temp
+*.~
+*.workspace
+*.project
+*.cproject
+*.settings/
+
+# Ignore generated files
+*.d
+*.lst
+*.srec
+*.sym
+*.lss
+*.dep
+*.i
+*.ii
+*.su
+*.mod
+*.cmd
+*.dwo
+*.dwp
+*.gcda
+*.gcno
+*.gcov
+
+# Ignore STM32CubeMX generated files
+*.ioc
+*.launch.json
+*.cproject
+*.project
+*.mxproject
+*.mxconfig
+
+# Ignore other temporary files
+*.log
+*.bak
+*.tmp
+*.temp
+*.~

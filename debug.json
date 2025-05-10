@@ -1,0 +1,25 @@
+{
+  "openocdPath": "/opt/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.externaltools.openocd.linux64_2.4.100.202501161620/tools/bin/openocd",
+    "gdbPath": "/home/eddie/st/stm32cubeclt_1.17.0/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+    "executablePath": "/media/eddie/Engineering/Projects/CICD-HIL-AI/build/Debug/CICD-HIL-AI.elf",
+    "openocdScriptsPath": "/home/eddie/st/OpenOCD/tcl",
+    "SVDPath": "/home/eddie/st/stm32cubeclt_1.17.0/STMicroelectronics_CMSIS_SVD/STM32H723.svd",
+    "MAPPath": "",
+    "core": "M7",
+    "serverArgs": {
+      "openocd": [
+        "-s",
+        "/opt/st/stm32cubeide_1.18.1/plugins/com.st.stm32cube.ide.mcu.debug.openocd_2.3.100.202501240831/resources/openocd/st_scripts",
+        "-f",
+        "/media/eddie/Engineering/Projects/CICD-HIL-AI/h7.cfg"
+      ],
+      "gdb": []
+    },
+    "pollingInterval": "1",
+    "enableITMSocket": true,
+    "enableSeggerRTTSocket": false,
+    "profileFreeRTOS": false,
+    "logTracesToFile": false,
+    "logTraceFileName": "trace_9.log",
+    "logAsBinary": false
+  }
