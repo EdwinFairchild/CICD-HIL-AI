@@ -26,6 +26,7 @@ jobs:
 
       - name: Build firmware
         run: |
+            cmake --preset=Debug
             cmake --build --preset=Debug
 
       - name: Flash the device
