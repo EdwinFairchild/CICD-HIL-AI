@@ -121,7 +121,7 @@ int main(void)
   {
     BSP_LED_Toggle(LED_GREEN);
     printf("Hal Tick: %d\r\n", (int)HAL_GetTick());
-    HAL_Delay(70);
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
