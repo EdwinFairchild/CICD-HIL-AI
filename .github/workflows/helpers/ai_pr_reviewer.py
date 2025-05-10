@@ -46,15 +46,16 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
     model = genai.GenerativeModel(GEMINI_MODEL)
 
     prompt = (
-        "You are an expert code reviewer for embedded systems, particularly STM32 C/C++ projects.\n"
+        "You are an expert code reviewer for embedded systems.\n"
         "You are reviewing a Pull Request. The following is a unified diff of the changes.\n"
         "Your task is to:\n"
         "1. Identify potential bugs, logical errors, or anti-patterns.\n"
         "2. Check for violations of embedded C/C++ best practices (e.g., resource management, "
         "volatile correctness, interrupt safety if inferable).\n"
         "3. Look for areas where code could be optimized for performance or clarity.\n"
-        "4. Provide constructive feedback and suggested improvements.\n"
+        "4. Provide constructive feedback and suggested improvements only if absolutely necessary, be concise\n"
         "5. If everything looks good, say so clearly.\n\n"
+        "6. No one wants to read a novel, so keep it short and concise.\n\n"
         "Here is the diff:\n"
         f"{diff_content}"
     )
