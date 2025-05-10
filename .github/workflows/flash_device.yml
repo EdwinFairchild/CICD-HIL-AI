@@ -84,4 +84,5 @@ jobs:
           PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
           GITHUB_TOKEN_SECRET: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          source .venv/bin/activate
           python .github/workflows/helpers/ai_pr_reviewer.py
