@@ -43,7 +43,7 @@ jobs:
           python .github/workflows/helpers/flash_device.py
 
   ai_code_review:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
     permissions:
