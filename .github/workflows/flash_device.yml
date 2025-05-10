@@ -83,6 +83,9 @@ jobs:
           GEMINI_API_KEY_SECRET: ${{ secrets.NONYA_BUSINESS_API_KEY }}
           PR_DIFF_URL: ${{ github.event.pull_request.diff_url }}
           GITHUB_TOKEN_SECRET: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
         run: |
           source .venv/bin/activate
           python .github/workflows/helpers/ai_pr_reviewer.py
