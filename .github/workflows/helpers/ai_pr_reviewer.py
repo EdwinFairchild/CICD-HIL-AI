@@ -61,13 +61,30 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
     except Exception as e:
         print(f"::error::AI review failed: {e}", file=sys.stderr)
         return "AI_REVIEW_FAILED"
+    
+def post_pr_comment(github_token: str, repo: str, pr_number: str, comment: str):
+    """Posts a comment to the specified PR using the GitHub API."""
+    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    data = {"body": comment}
+    try:
+        response = requests.post(url, json=data, headers=headers, timeout=30)
+        response.raise_for_status()
+        print(f"::info::Successfully posted comment to PR #{pr_number}")
+    except requests.exceptions.RequestException as e:
+        print(f"::error::Failed to post comment to PR #{pr_number}: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     # First, try environment variables (GitHub Actions mode)
     gemini_api_key = os.getenv("GEMINI_API_KEY_SECRET")
     pr_diff_url = os.getenv("PR_DIFF_URL")
     github_token = os.getenv("GITHUB_TOKEN_SECRET")
-
+    repo = os.getenv("GITHUB_REPOSITORY")
+    pr_number = os.getenv("PR_NUMBER")
     if gemini_api_key and pr_diff_url and github_token:
         diff_text = fetch_pr_diff(pr_diff_url, github_token)
 
@@ -81,7 +98,16 @@ if __name__ == "__main__":
             sys.exit(0)
 
         review_comment = get_ai_review(gemini_api_key, diff_text)
-        print(review_comment)
+        if review_comment == "NO_REVIEW":
+            comment = "AI Code Review: No review generated due to empty diff content."
+        elif review_comment == "AI_REVIEW_FAILED":
+            comment = "AI Code Review: Failed to generate review due to an error."
+        else:
+            comment = f"AI Code Review:\n\n{review_comment}"
+
+        # Post the review as a PR comment
+        post_pr_comment(github_token, repo, pr_number, comment)
+        print(review_comment)  # Still print for logs
 
     else:
         # Local CLI mode: python ai_pr_reviewer.py <API_KEY> <diff_file>
