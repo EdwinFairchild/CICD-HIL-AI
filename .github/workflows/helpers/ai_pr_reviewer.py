@@ -11,6 +11,65 @@ MAX_DIFF_CHARS = 25000
 GEMINI_MODEL = "gemini-1.5-flash-latest"  # Use flash for speed and cost-effectiveness for this task
 
 
+def fetch_pr_comments(github_token: str, repo: str, pr_number: str):
+    # Fetch review comments
+    reviews_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews"
+    # Fetch issue comments (general PR comments)
+    issue_comments_url = (
+        f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    all_comments = []
+
+    try:
+        # Get review comments
+        response = requests.get(reviews_url, headers=headers, params={"per_page": 100})
+        response.raise_for_status()
+        reviews = response.json()
+        for review in reviews:
+            if review.get("body"):  # General review body
+                all_comments.append(
+                    {
+                        "user": review["user"]["login"],
+                        "body": review["body"],
+                        "state": review.get("state"),
+                    }
+                )
+            # Get comments made on specific lines within a review
+            review_comments_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews/{review['id']}/comments"
+            r_comments_resp = requests.get(review_comments_url, headers=headers)
+            r_comments_resp.raise_for_status()
+            for r_comment in r_comments_resp.json():
+                all_comments.append(
+                    {
+                        "user": r_comment["user"]["login"],
+                        "body": r_comment["body"],
+                        "path": r_comment.get("path"),
+                        "line": r_comment.get("line"),
+                    }
+                )
+
+        # Get general issue comments on the PR
+        response = requests.get(
+            issue_comments_url, headers=headers, params={"per_page": 100}
+        )
+        response.raise_for_status()
+        issue_comments = response.json()
+        for comment in issue_comments:
+            all_comments.append(
+                {"user": comment["user"]["login"], "body": comment["body"]}
+            )
+
+    except requests.exceptions.RequestException as e:
+        print(f"::error::Failed to fetch PR comments: {e}")
+        return []
+    return all_comments
+
+
 def fetch_pr_diff(diff_url, github_token):
     """Fetches the diff content of a PR."""
     headers = {
@@ -41,6 +100,36 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
         diff_content = (
             diff_content[:MAX_DIFF_CHARS] + "\n\n... (diff truncated due to length)"
         )
+        # Inside get_ai_review, before generating the prompt
+    # Assume GITHUB_BOT_USERNAME is an env var or constant with your bot's GitHub username
+    bot_username = "Github-Actions"
+    pr_comments = fetch_pr_comments(
+        github_token, repo, pr_number
+    )  # You'd pass these args
+
+    conversation_history_str = ""
+    if pr_comments:
+        conversation_history_str += "Previous conversation on this PR:\n"
+        # Filter and format relevant comments (this logic can get complex)
+        # For simplicity, let's just take the last few comments involving the bot
+        recent_relevant_comments = []
+        for comm in reversed(pr_comments):  # newest first
+            if len(recent_relevant_comments) > 5:  # Limit history size
+                break
+            if comm["user"] == bot_username or any(
+                bot_username in c.get("body", "")
+                for c in recent_relevant_comments
+                if c["user"] != bot_username
+            ):
+                # A simple heuristic: take bot comments or replies to recent bot comments
+                formatted_comment = (
+                    f"- {comm['user']}: {comm['body'][:200]}...\n"  # Truncate
+                )
+                recent_relevant_comments.insert(
+                    0, formatted_comment
+                )  # Add to beginning to maintain order
+
+        conversation_history_str += "".join(recent_relevant_comments) + "\n"
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(GEMINI_MODEL)
@@ -55,7 +144,11 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
         "3. Look for areas where code could be optimized for performance or clarity.\n"
         "4. Provide constructive feedback and suggested improvements only if absolutely necessary, be concise\n"
         "5. If everything looks good, say so clearly.\n\n"
-        "6. No one wants to read a novel, so keep it short and concise. Tokens cost moeny!!!\n\n"
+        "6. No one wants to read a novel, so keep it short and concise. Tokens cost money!!!\n"
+        "7. Consider the previous conversation when formulating your new review points.\n"
+        "8. If a point you previously made appears to be addressed or discussed, acknowledge that or refine your feedback.\n"
+        "Here is the previous conversation:\n"
+        f"{conversation_history_str}\n"
         "Here is the diff:\n"
         f"{diff_content}"
     )
