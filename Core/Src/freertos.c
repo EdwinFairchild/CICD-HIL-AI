@@ -157,7 +157,7 @@ void StartTask2(void *argument)
   for(;;)
   {
     led_updates(systemLeds, NUM_LEDS);
-    osDelay(12); // 1000ms delay
+    osDelay(12); // Delay of 12 is used because it works given our other constraints
   }
   /* USER CODE END StartTask2 */
 }
