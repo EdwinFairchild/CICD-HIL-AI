@@ -107,29 +107,7 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
         github_token, repo, pr_number
     )  # You'd pass these args
 
-    conversation_history_str = ""
-    if pr_comments:
-        conversation_history_str += "Previous conversation on this PR:\n"
-        # Filter and format relevant comments (this logic can get complex)
-        # For simplicity, let's just take the last few comments involving the bot
-        recent_relevant_comments = []
-        for comm in reversed(pr_comments):  # newest first
-            if len(recent_relevant_comments) > 5:  # Limit history size
-                break
-            if comm["user"] == bot_username or any(
-                bot_username in c.get("body", "")
-                for c in recent_relevant_comments
-                if c["user"] != bot_username
-            ):
-                # A simple heuristic: take bot comments or replies to recent bot comments
-                formatted_comment = (
-                    f"- {comm['user']}: {comm['body'][:200]}...\n"  # Truncate
-                )
-                recent_relevant_comments.insert(
-                    0, formatted_comment
-                )  # Add to beginning to maintain order
-
-        conversation_history_str += "".join(recent_relevant_comments) + "\n"
+   
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(GEMINI_MODEL)
@@ -148,7 +126,7 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
         "7. Consider the previous conversation when formulating your new review points.\n"
         "8. If a point you previously made appears to be addressed or discussed, acknowledge that or refine your feedback.\n"
         "Here is the previous conversation:\n"
-        f"{conversation_history_str}\n"
+        f"{pr_comments}\n"
         "Here is the diff:\n"
         f"{diff_content}"
     )
