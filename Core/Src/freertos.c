@@ -146,10 +146,9 @@ void StartTask2(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    //this will blink the yellow LED every 13ms
+    //this will blink the yellow LED every 100ms
     BSP_LED_Toggle(LED_YELLOW);
-    while(1);
-    osDelay(10);
+    osDelay(100);
   }
   /* USER CODE END StartTask2 */
 }
