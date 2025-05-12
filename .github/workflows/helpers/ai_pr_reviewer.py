@@ -102,7 +102,7 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
         )
         # Inside get_ai_review, before generating the prompt
     # Assume GITHUB_BOT_USERNAME is an env var or constant with your bot's GitHub username
-    bot_username = "Github-Actions"
+    bot_username = "github-actions"
     pr_comments = fetch_pr_comments(
         github_token, repo, pr_number
     )  # You'd pass these args
