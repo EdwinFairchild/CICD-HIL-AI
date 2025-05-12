@@ -154,6 +154,8 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
     )
 
     try:
+        # print the prompt for debugging
+        print(f"::debug::Prompt for AI review:\n{prompt}", file=sys.stderr)
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
