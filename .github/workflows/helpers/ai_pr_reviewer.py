@@ -111,19 +111,20 @@ def get_ai_review(api_key: str, diff_content: str) -> str:
     model = genai.GenerativeModel(GEMINI_MODEL)
 
     prompt = (
-        "You are an expert code reviewer for embedded systems.\n"
+        "You are reviewing embedded C firmware.\n"
         "You are reviewing a Pull Request. The following is a unified diff of the changes and Pr comment history.\n"
         "Your task is to:\n"
         "1. Identify potential bugs, logical errors, or anti-patterns.\n"
         "2. Check for violations of embedded C/C++ best practices (e.g., resource management, "
         "volatile correctness, interrupt safety if inferable).\n"
         "3. Look for areas where code could be optimized for performance or clarity.\n"
-        "4. Provide constructive feedback and suggested improvements only if absolutely necessary, be concise\n"
+        "4. Provide constructive feedback and suggested improvements if applicable, be concise\n"
         "5. If everything looks good, say so clearly.\n\n"
         "6. No one wants to read a novel, so keep it short and concise. Tokens cost money!!!\n"
         "7. Consider the previous conversation when formulating your new review points.\n"
         "8. If a point you previously made appears to be addressed or discussed, acknowledge that or refine your feedback.\n"
-        "9. use bullet points to divide comments refrencing differnt files, noting the file being refrenced. Github comments accept markdown\n"
+        "9. The current version of the diff you are seeing may already address issues previously commented on, you have the latest changes."
+        "10. Use bullet points to divide comments refrencing differnt files, noting the file being refrenced. Github comments accept markdown\n"
         "Here is the previous conversation:\n"
         f"{pr_comments}\n"
         "Here is the diff:\n"
